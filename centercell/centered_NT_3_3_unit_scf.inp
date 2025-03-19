@@ -1,0 +1,49 @@
+&CONTROL
+	calculation	=	'scf'
+	restart_mode	=	'from_scratch'
+	prefix		=	'elstruct'
+	outdir		=	'./elstruct/'
+	pseudo_dir	=	'./PSEUDO'
+	wf_collect	=	.true.
+	max_seconds	=	86000
+	nstep		=	500
+/
+&SYSTEM
+	ibrav		=	4
+	celldm(1)	=	22.677        ! in Bohr a=12 ang
+	celldm(3)	=	0.204648      !	c~2.45, dall'ott strut, coerente con coord
+	nat		=	12
+	ntyp		=	1
+	ecutwfc		=	45
+	ecutrho		=	320
+	occupations	=	'smearing'
+	smearing	=	'mv'
+	degauss		=	0.004
+	vdw_corr	=	'grimme-d2'
+/
+&ELECTRONS
+        electron_maxstep        =       200
+        mixing_beta             =       0.2
+        conv_thr                =       1.0d-7
+/
+&IONS
+/
+&CELL
+/
+ATOMIC_SPECIES
+C       12.01        C.pbesol-n-rrkjus_psl.1.0.0.UPF
+K_POINTS {automatic}
+1 1 5  0 0 0
+ATOMIC_POSITIONS {angstrom}
+C  5.096434787190898  5.195138121987753  0.6139202003278814
+C  4.605480435890898  6.544843195087753  0.6139186831278813
+C  4.049352692490897  7.011398268787754  1.8418866055278813
+C  2.6349539553908974  7.260798016387753  1.8418869187278815
+C  1.9528812095908974  7.012347790387754  0.6139196365278814
+C  1.0296290809908972  5.912189752887754  0.6139194692278814
+C  0.9036348285908975  5.197296690387754  1.8418869000278812
+C  1.3945953850908974  3.8475974966877535  1.8418882849278813
+C  1.9507249233908974  3.3810437723877533  0.6139204306278814
+C  3.3651257492908973  3.131635828287753  0.6139200395278814
+C  4.047198868190897  3.3800835994877536  1.8418874203278812
+C  4.970442902990897  4.4802443094877535  1.8418875667278813
