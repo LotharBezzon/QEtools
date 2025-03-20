@@ -1,7 +1,11 @@
+from __future__ import absolute_import
+from __future__ import division, print_function, with_statement
 import argparse
 import numpy as np
 import os
 import sys
+
+python_version = sys.version.split()[0]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--inputfile', help='Input file', type=str)
@@ -11,7 +15,10 @@ parser.add_argument('-mc', '--makecopy', action='store_true', required=False)
 args = parser.parse_args()
 
 if args.makecopy==False:
-    ans = input('Are you sure you want to overwrite the input file? (y/n) ').lower()
+    if int(python_version[0]) > 2:
+        ans = input('Are you sure you want to overwrite the input file? (y/n) ').lower()
+    else:
+        ans = raw_input('Are you sure you want to overwrite the input file? (y/n) ').lower()
     if ans != 'y':
         sys.exit('If you want to keep the original file, please use the -mc option to keep a copy of the input file')
     
