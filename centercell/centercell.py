@@ -6,10 +6,15 @@ import sys
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--inputfile', help='Input file', type=str)
 parser.add_argument('-o', '--outputprefix', help='Output file', default='centered_', type=str, required=False)
-parser.add_argument('-mc', '--makecopy', default=True, type=bool, required=False)
+parser.add_argument('-mc', '--makecopy', action='store_true', required=False)
 
 args = parser.parse_args()
 
+if args.makecopy==False:
+    ans = input('Are you sure you want to overwrite the input file? (y/n) ').lower()
+    if ans != 'y':
+        sys.exit('If you want to keep the original file, please use the -mc option to keep a copy of the input file')
+    
 bohr = 0.52917721067    # Bohr to Angstrom conversion factor
 
 with open(args.inputfile, 'r') as f:
@@ -85,14 +90,16 @@ with open(args.inputfile, 'r') as f:
         raise ValueError('ibrav not supported yet :( \n Please consider contributing to the project at https://github.com/LotharBezzon/QEtools')
     
     cell_center = (v1 + v2 + v3) / 2
-    print(cell_center)
     shift = com - cell_center
     coords -= shift
 
-    with open(args.inputfile, 'r') as f:
-        lines = f.readlines()
-        with open(args.outputprefix + args.inputfile, 'w') as g:
-            for line in lines[:start_coords+1]:
-                g.write(line)
-            for i in range(nat):
-                g.write('C' + '  ' + str(coords[i, 0]) + '  ' + str(coords[i, 1]) + '  ' + str(coords[i, 2]) + '\n')
+    if args.makecopy == True:
+        outfile = args.outputprefix + args.inputfile
+    else:
+        outfile = args.inputfile
+
+    with open(outfile, 'w') as g:
+        for line in lines[:start_coords+1]:
+            g.write(line)
+        for i in range(nat):
+            g.write('C' + '  ' + str(coords[i, 0]) + '  ' + str(coords[i, 1]) + '  ' + str(coords[i, 2]) + '\n')
