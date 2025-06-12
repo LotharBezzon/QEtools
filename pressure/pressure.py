@@ -1,15 +1,17 @@
 import os
 import subprocess
 import re # For regular expressions to parse output
+import numpy as np
 
 # --- Configuration ---
-QE_BIN = "/path/to/your/qe/bin/pw.x" 
+QE_VERSION = '7.4.1'
+QE_BIN = os.path.join(f'qe-{QE_VERSION}', 'bin', 'pw.x')
 PSEUDO_DIR = "./pseudos/"
 OUTDIR_BASE = "./tmp_output_python/"
-NUM_CORES = 4 # Adjust based on your laptop's CPU
+NUM_CORES = 2 # Adjust based on your laptop's CPU
 
 # Pressures in kbar (1 GPa = 10 kbar)
-PRESSURES_KBAR = [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100]
+PRESSURES_KBAR = np.linspace(0, 100, 11)
 
 # Initial cell parameter for Ge in Bohr (approximate, vc-relax will optimize)
 # This is celldm(1) in QE. For Ge, it's around 10.7 Bohr at 0 GPa.
