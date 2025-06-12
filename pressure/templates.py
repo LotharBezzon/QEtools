@@ -1,6 +1,22 @@
+import os
+
+QE_VERSION = '7.4.1'
+PSEUDO_DIR = os.path.join(f'qe-{QE_VERSION}', 'pseudo')
+OUTDIR_BASE = "./tmp_output_python/"
+
+# Initial cell parameter for Ge in Bohr (approximate, vc-relax will optimize)
+# This is celldm(1) in QE. For Ge, it's around 10.7 Bohr at 0 GPa.
+INITIAL_CELLDM1 = 10.7 
+
+# Converged parameters (replace with your actual converged values)
+ECUTWFC = 40.0
+ECUTRHO = 160.0
+K_POINTS_GRID = "6 6 6 0 0 0"
+PSEUDOPOTENTIAL_FILE = "Ge.pbe-kjpaw.UPF"
+
 # --- QE Input Template ---
 # Use f-strings for easy variable substitution later
-QE_INPUT_TEMPLATE = f"""
+Ge_cd = f"""
 &CONTROL
   calculation = 'vc-relax'
   prefix = 'Ge'
