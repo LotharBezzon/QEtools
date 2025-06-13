@@ -9,9 +9,9 @@ OUTDIR_BASE = "./tmp_output_python/"
 INITIAL_CELLDM1 = 10.7 
 
 # Converged parameters (replace with your actual converged values)
-ECUTWFC = 40.0
-ECUTRHO = 160.0
-K_POINTS_GRID = "6 6 6 0 0 0"
+ECUTWFC = 50.0
+ECUTRHO = 200.0
+K_POINTS_GRID = "6 6 6 1 1 1"
 PSEUDOPOTENTIAL_FILE = "Ge.pbe-kjpaw.UPF"
 
 # --- QE Input Template ---
@@ -46,7 +46,7 @@ Ge_cd = f"""
   cell_dynamics = 'bfgs'
   press = {{pressure_val}} ! Placeholder for pressure
   press_conv_thr = 0.5  ! kbar
-  cell_dofree = 'all'
+  cell_dofree = 'ibrav'
 /
 ATOMIC_SPECIES
   Ge  72.63  {PSEUDOPOTENTIAL_FILE}

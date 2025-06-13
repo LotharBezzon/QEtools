@@ -144,8 +144,8 @@ def find_converged_value(x_values, energies, tolerance=1e-4):
 
 def main():
     # --- Configuration ---
-    PW_X_PATH = 'pw.x'  # Make sure 'pw.x' is in your system's PATH or provide full path
-    PSEUDO_DIR = '.qe-7.4.1/pseudo/' # Directory where your .UPF pseudopotential files are located
+    PW_X_PATH = './qe-7.4.1/bin/pw.x'  # Make sure 'pw.x' is in your system's PATH or provide full path
+    PSEUDO_DIR = './qe-7.4.1/pseudo/' # Directory where your .UPF pseudopotential files are located
     SYSTEM_NAME = 'Ge' # Prefix for output files and identifier for pseudopotential
 
     # Create a temporary directory for output files
