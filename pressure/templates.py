@@ -45,7 +45,7 @@ Ge_cd = f"""
 &CELL
   cell_dynamics = 'bfgs'
   press = {{pressure_val}} ! Placeholder for pressure
-  press_conv_thr = 0.5
+  press_conv_thr = 0.5  ! kbar
   cell_dofree = 'all'
 /
 ATOMIC_SPECIES
