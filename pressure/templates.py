@@ -16,7 +16,7 @@ PSEUDOPOTENTIAL_FILE = "Ge.pbe-kjpaw.UPF"
 
 # --- QE Input Template ---
 # Use f-strings for easy variable substitution later
-Ge_cd = f"""
+Ge_I = f"""
 &CONTROL
   calculation = 'vc-relax'
   prefix = 'Ge'

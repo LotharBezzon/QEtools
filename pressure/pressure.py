@@ -6,22 +6,29 @@ from templates import *
 import argparse
 
 parser = argparse.ArgumentParser(description="Run QE vc-relax calculations at different pressures.")
-parser.add_argument('-t', '--template', type=str)
+parser.add_argument('-t', '--templates', type=str, nargs='+')
 args = parser.parse_args()
 
 # --- Configuration ---
-if args.template in globals():
-    QE_INPUT_TEMPLATE = globals()[args.template]
-else:
-    raise ValueError(f"Template '{args.template}' not found. Add it to templates.py.")
+QE_INPUT_TEMPLATES = []
+for template_name in args.templates:
+    if template_name in globals():
+        QE_INPUT_TEMPLATES.append(globals()[template_name])
+    else:
+        raise ValueError(f"Template '{template_name}' not found. Add it to templates.py.")
+    
 QE_BIN = os.path.join(f'qe-{QE_VERSION}', 'bin', 'pw.x')
 NUM_CORES = 2 # Adjust based on your laptop's CPU
 
 # Pressures in kbar (1 GPa = 10 kbar)
-PRESSURES_KBAR = np.linspace(0, 100, 11)
+PRESSURES_KBAR = [np.linspace(0, 100, 11), np.linspace(50, 150, 11)]
+
+# Ensure the number of pressure sets matches the number of templates
+if len(PRESSURES_KBAR) != len(QE_INPUT_TEMPLATES):
+    raise ValueError("Number of pressure sets must match number of templates provided.")
 
 # --- Main Script Logic ---
-def run_qe_relaxation(pressure_kbar):
+def run_qe_relaxation(pressure_kbar, index):
     """
     Generates QE input, runs vc-relax, and extracts key data.
     """
@@ -32,7 +39,7 @@ def run_qe_relaxation(pressure_kbar):
     output_filename = os.path.join(run_dir, f"Ge_vc-relax_{pressure_kbar}kbar.out")
 
     # Generate input file content with current pressure
-    input_content = QE_INPUT_TEMPLATE.format(pressure_val=pressure_kbar)
+    input_content = QE_INPUT_TEMPLATES[index].format(pressure_val=pressure_kbar)
 
     with open(input_filename, 'w') as f:
         f.write(input_content)
@@ -109,18 +116,19 @@ if __name__ == "__main__":
         print("Please download it and place it there.")
         exit(1)
 
-    all_results = []
-    for p in PRESSURES_KBAR:
-        result = run_qe_relaxation(p)
+    all_results = [[] for _ in range(len(PRESSURES_KBAR))]
+    for i, p in enumerate(PRESSURES_KBAR):
+        result = run_qe_relaxation(p, i)
         if result:
-            all_results.append(result)
+            all_results[i].append(result)
 
     # --- Print Summary (Optional) ---
     print("\n--- Summary of Results ---")
     print(f"{'Pressure (kbar)':<15} {'Enthalpy (Ry)':<18} {'Volume (a.u.^3)':<18} {'Lattice (Bohr)':<18}")
     print("-" * 70)
     for res in all_results:
-        print(f"{res['pressure_kbar']:<15.1f} {res['enthalpy_Ry']:<18.8f} {res['volume_au3']:<18.8f} {res['lattice_param_bohr']:<18.8f}")
+        for r in res:
+            print(f"{r['pressure_kbar']:<15.1f} {r['enthalpy_Ry']:<18.8f} {r['volume_au3']:<18.8f} {r['lattice_param_bohr']:<18.8f}")
 
     # --- Further Analysis (e.g., plot Equation of State) ---
     # You would typically use libraries like NumPy and Matplotlib for this.
@@ -129,18 +137,22 @@ if __name__ == "__main__":
         import numpy as np
         import matplotlib.pyplot as plt
         
-        pressures = np.array([r['pressure_kbar'] for r in all_results])
-        enthalpies = np.array([r['enthalpy_Ry'] for r in all_results])
-        volumes = np.array([r['volume_au3'] for r in all_results])
+        pressures = [np.array([r['pressure_kbar'] for r in results]) for results in all_results]
+        enthalpies = [np.array([r['enthalpy_Ry'] for r in results]) for results in all_results]
+        volumes = [np.array([r['volume_au3'] for r in results]) for results in all_results]
 
         # Convert kbar to GPa for plotting if preferred (1 GPa = 10 kbar)
         pressures_gpa = pressures / 10.0
 
         plt.figure(figsize=(10, 6))
-        plt.plot(pressures_gpa, enthalpies, 'o-', label='Enthalpy vs. Pressure')
+        for i in range(len(pressures_gpa)):
+            plt.plot(pressures_gpa[i], enthalpies[i], 'o-', label='Enthalpy vs. Pressure')
         plt.xlabel('Pressure (GPa)')
         plt.ylabel('Enthalpy (Ry)')
-        plt.title('Enthalpy-Pressure Curve for Germanium')
+        work_name = args.templates[0]
+        for i in range(1, len(args.templates)):
+            work_name += f", {args.templates[i]}"
+        plt.title(f'Enthalpy-Pressure Curve for {work_name}')
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
@@ -148,10 +160,11 @@ if __name__ == "__main__":
         plt.show()
 
         plt.figure(figsize=(10, 6))
-        plt.plot(pressures_gpa, volumes, 'o-', label='Volume vs. Pressure')
+        for i in range(len(pressures_gpa)):
+            plt.plot(pressures_gpa[i], volumes[i], 'o-', label='Volume vs. Pressure')
         plt.xlabel('Pressure (GPa)')
         plt.ylabel('Volume (a.u.^3)')
-        plt.title('Equation of State for Germanium')
+        plt.title(f'Equation of State for {work_name}')
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
