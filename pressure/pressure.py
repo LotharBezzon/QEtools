@@ -32,7 +32,7 @@ def run_qe_relaxation(pressure_kbar, index):
     """
     Generates QE input, runs vc-relax, and extracts key data.
     """
-    run_dir = f"pressure_{pressure_kbar}kbar"
+    run_dir = f"runs/pressure_{pressure_kbar}kbar"
     os.makedirs(run_dir, exist_ok=True) # Create directory if it doesn't exist
 
     input_filename = os.path.join(run_dir, f"Ge_vc-relax_{pressure_kbar}kbar.in")

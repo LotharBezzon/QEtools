@@ -37,7 +37,7 @@ def generate_input_file(filename, ecutwfc, nkx, nky, nkz, offx, offy, offz, pseu
     conv_thr = 1.0e-8, ! Self-consistency convergence threshold
 /
 ATOMIC_SPECIES
-    Ge 72.63 Ge.pbe-kjpaw.UPF ! Example: Germanium pseudopotential (you need to have this file)
+    Ge 72.64 Ge.pbe-kjpaw.UPF ! Example: Germanium pseudopotential (you need to have this file)
 ATOMIC_POSITIONS (alat)
     Ge 0.00 0.00 0.00
     Ge 0.25 0.25 0.25
@@ -146,7 +146,7 @@ def main():
     # --- Configuration ---
     PW_X_PATH = './qe-7.4.1/bin/pw.x'  # Make sure 'pw.x' is in your system's PATH or provide full path
     PSEUDO_DIR = './qe-7.4.1/pseudo/' # Directory where your .UPF pseudopotential files are located
-    SYSTEM_NAME = 'Ge' # Prefix for output files and identifier for pseudopotential
+    SYSTEM_NAME = 'Ge' # Prefix for output files
 
     # Create a temporary directory for output files
     os.makedirs('./tmp', exist_ok=True)
