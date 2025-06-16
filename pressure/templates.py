@@ -40,8 +40,8 @@ Ge_II_params = {
     'ntypes': 1,
     'ecutwfc': ECUTWFC,
     'ecutrho': ECUTRHO,
-    'cell_params': "5.0000 0.0000 0.0000\n0.0000 5.0000 0.0000\n0.0000 0.0000 2.7500\n",
-    'atomic_positions': ["0.00 0.00 0.25", "0.50 0.50 0.75"],
+    'cell_params': "  -2.5519 2.5519 1.4071\n  2.5519 -2.5519 1.4071\n  2.5519 2.5519 -1.4071\n",
+    'atomic_positions': ["2.5519 2.5519 -0.0000", "2.5519 -0.0000 0.7035"],
     'k_points_grid': K_POINTS_GRID,
     'degauss': 0.02,
     'metal': True
@@ -103,95 +103,13 @@ K_POINTS {{automatic}}
 """
     return template
 
-# --- QE Input Template ---
-# Use f-strings for easy variable substitution later
-Ge_I = f"""
-&CONTROL
-  calculation = 'vc-relax'
-  prefix = 'Ge-I'
-  outdir = '{OUTDIR_BASE}'
-  pseudo_dir = '{PSEUDO_DIR}'
-  tprnfor = .true.
-  tstress = .true.
-  etot_conv_thr = 1.0d-4
-  forc_conv_thr = 1.0d-3
-/
-&SYSTEM
-  ibrav = 0
-  nat = {NATOMS}
-  ntyp = {NTYPES}
-  ecutwfc = {ECUTWFC}
-  ecutrho = {ECUTRHO}
-/
-&ELECTRONS
-  conv_thr = 1.0d-8
-  mixing_beta = 0.7
-/
-&IONS
-  ion_dynamics = 'bfgs'
-/
-&CELL
-  cell_dynamics = 'bfgs'
-  press = {{pressure_val}} ! Placeholder for pressure
-  press_conv_thr = 0.5  ! kbar
-  cell_dofree = 'all'
-/
-CELL_PARAMETERS {{angstrom}}
-{CELL_PARAMS}
-ATOMIC_SPECIES
-  Ge  72.64  {PSEUDOPOTENTIAL_FILE}
-ATOMIC_POSITIONS {{angstrom}}
-  Ge  {ATOMIC_POSITIONS[0]}
-  Ge  {ATOMIC_POSITIONS[1]}
-K_POINTS {{automatic}}
-  {K_POINTS_GRID}
-"""
+Ge_I = prepare_template(**Ge_I_params)
+Ge_II = prepare_template(**Ge_II_params)
 
-Ge_II = f"""
-&CONTROL
-  calculation = 'vc-relax'
-  prefix = 'Ge-II'
-  outdir = '{OUTDIR_BASE}'
-  pseudo_dir = '{PSEUDO_DIR}'
-  tprnfor = .true.
-  tstress = .true.
-  etot_conv_thr = 1.0d-4
-  forc_conv_thr = 1.0d-3
-/
-&SYSTEM
-  ibrav = 0
-  nat = 2
-  ntyp = 1
-  ecutwfc = {ECUTWFC}
-  ecutrho = {ECUTRHO}
-  occupation = 'smearing'
-  smearing = 'gaussian'
-  degauss = 0.02
-/
-&ELECTRONS
-  conv_thr = 1.0d-8
-  mixing_beta = 0.7
-/
-&IONS
-  ion_dynamics = 'bfgs'
-/
-&CELL
-  cell_dynamics = 'bfgs'
-  press = {{pressure_val}} ! Placeholder for pressure
-  press_conv_thr = 0.5  ! kbar
-  cell_dofree = 'all'
-/
-ATOMIC_SPECIES
-  Ge  72.64  {PSEUDOPOTENTIAL_FILE}
-CELL_PARAMETERS (angstrom)
-5.000000000   0.000000000   0.000000000
-0.000000000   5.000000000   0.000000000
-0.000000000   0.000000000   2.750000000
-! Initial guess for Ge-II lattice parameters (a ~ 5.0 Å, c ~ 2.75 Å for c/a ~ 0.55)
-! These are highly dependent on the target pressure.
-ATOMIC_POSITIONS (crystal)
-Ge  0.00  0.00  0.25
-Ge  0.50  0.50  0.75
-K_POINTS (automatic)
-  {K_POINTS_GRID}
-"""
+if __name__ == "__main__":
+    # Print the templates to verify
+    print("Ge-I Template:")
+    print(Ge_I)
+    print("\nGe-II Template:")
+    print(Ge_II)
+    
