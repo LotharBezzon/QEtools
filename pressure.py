@@ -37,8 +37,8 @@ def run_qe_relaxation(pressure_kbar, index):
     run_dir = f"runs/pressure_{pressure_kbar}kbar"
     os.makedirs(run_dir, exist_ok=True) # Create directory if it doesn't exist
 
-    input_filename = os.path.join(run_dir, f"Ge_vc-relax_{pressure_kbar}kbar.in")
-    output_filename = os.path.join(run_dir, f"Ge_vc-relax_{pressure_kbar}kbar.out")
+    input_filename = os.path.join(run_dir, f"{args.templates[index]}_vc-relax_{pressure_kbar}kbar.in")
+    output_filename = os.path.join(run_dir, f"{args.templates[index]}_vc-relax_{pressure_kbar}kbar.out")
 
     # Generate input file content with current pressure
     input_content = prepare_input(**QE_INPUT_TEMPLATES[index],
@@ -142,12 +142,9 @@ if __name__ == "__main__":
         import numpy as np
         import matplotlib.pyplot as plt
 
-        pressures = np.array([np.array([r['pressure_kbar'] for r in results]) for results in all_results])
-        enthalpies = np.array([np.array([r['enthalpy_Ry'] for r in results]) for results in all_results])
-        volumes = np.array([np.array([r['volume_au3'] for r in results]) for results in all_results])
-
-        # Convert kbar to GPa for plotting if preferred (1 GPa = 10 kbar)
-        pressures_gpa = pressures / 10.0
+        pressures_gpa = [np.array([r['pressure_kbar'] / 10 for r in results]) for results in all_results]
+        enthalpies = [np.array([r['enthalpy_Ry'] for r in results]) for results in all_results]
+        volumes = [np.array([r['volume_au3'] for r in results]) for results in all_results]
 
         plt.figure(figsize=(10, 6))
         for i in range(len(pressures_gpa)):
