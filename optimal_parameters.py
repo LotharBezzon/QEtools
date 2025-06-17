@@ -12,7 +12,7 @@ args = parser.parse_args()
 
 if args.template+'_params' in globals():
     QE_INPUT_TEMPLATE = globals()[args.template+'_params']
-    del QE_INPUT_TEMPLATE['ecutwfc', 'ecutrho', 'k_points_grid']
+    del QE_INPUT_TEMPLATE['ecutwfc', 'ecutrho', 'k_points_grid']    # These will be tested later
 else:
     raise ValueError(f"Template '{args.template}' not found. Add it to templates.py.")
 
@@ -25,7 +25,7 @@ def generate_input_file(input_template, filename, ecutwfc, k_points):
     with open(filename, 'w') as f:
         f.write(input_content)
 
-def run_pwscf(input_file, output_file, pw_x_path='pw.x'):
+def run_pwscf(input_file, output_file, pw_x_path='pw.x', n_cores=2):
     """
     Runs the pw.x executable.
 
@@ -39,8 +39,9 @@ def run_pwscf(input_file, output_file, pw_x_path='pw.x'):
     """
     print(f"Running {pw_x_path} with {input_file}...")
     try:
+        command = f"mpirun -np {n_cores} {pw_x_path} -inp {input_file}"
         with open(output_file, 'w') as outfile:
-            subprocess.run([pw_x_path, '-in', input_file], stdout=outfile, stderr=subprocess.PIPE, check=True)
+            subprocess.run(command.split(), stdout=outfile, stderr=subprocess.PIPE, check=True)
         print(f"Successfully ran {input_file}")
         return True
     except subprocess.CalledProcessError as e:
@@ -137,7 +138,7 @@ def main():
     # Define ecutwfc values to test (adjust based on your pseudopotential type)
     # For norm-conserving, start lower (e.g., 20-40 Ry). For ultrasoft/PAW, can be higher.
     ecutwfc_values = list(range(20, 81, 5)) # Example: 20, 25, ..., 80 Ry
-    fixed_k_points = (4, 4, 4, 1, 1, 1) # A reasonable starting k-point grid for many bulk systems
+    fixed_k_points = "4 4 4 1 1 1" # A reasonable starting k-point grid for many bulk systems
 
     ecutwfc_energies = []
     ecutwfc_tested = []
@@ -146,7 +147,8 @@ def main():
         input_file = f"tmp/{SYSTEM_NAME}_ecut_{ecut}.in"
         output_file = f"tmp/{SYSTEM_NAME}_ecut_{ecut}.out"
 
-        generate_input_file(input_file, ecut, *fixed_k_points, PSEUDO_DIR, SYSTEM_NAME)
+        generate_input_file(QE_INPUT_TEMPLATE, input_file, ecut, fixed_k_points)
+
         if run_pwscf(input_file, output_file, PW_X_PATH):
             energy = parse_total_energy(output_file)
             if energy is not None:
@@ -188,9 +190,10 @@ def main():
     for n_k in k_mesh_values:
         input_file = f"tmp/{SYSTEM_NAME}_kpt_{n_k}.in"
         output_file = f"tmp/{SYSTEM_NAME}_kpt_{n_k}.out"
-        current_k_points = (n_k, n_k, n_k, 1, 1, 1) # Using shifted Monkhorst-Pack grid
+        current_k_points = f"{n_k} {n_k} {n_k} 1 1 1" # Using shifted Monkhorst-Pack grid
 
-        generate_input_file(input_file, converged_ecutwfc, *current_k_points, PSEUDO_DIR, SYSTEM_NAME)
+        generate_input_file(QE_INPUT_TEMPLATE, input_file, converged_ecutwfc, current_k_points)
+
         if run_pwscf(input_file, output_file, PW_X_PATH):
             energy = parse_total_energy(output_file)
             if energy is not None:

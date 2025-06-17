@@ -121,10 +121,11 @@ if __name__ == "__main__":
         exit(1)
 
     all_results = [[] for _ in range(len(PRESSURES_KBAR))]
-    for i, p in enumerate(PRESSURES_KBAR):
-        result = run_qe_relaxation(p, i)
-        if result:
-            all_results[i].append(result)
+    for i, ps in enumerate(PRESSURES_KBAR):
+        for p in ps:
+            result = run_qe_relaxation(p, i)
+            if result:
+                all_results[i].append(result)
 
     # --- Print Summary (Optional) ---
     print("\n--- Summary of Results ---")
@@ -140,10 +141,10 @@ if __name__ == "__main__":
     try:
         import numpy as np
         import matplotlib.pyplot as plt
-        
-        pressures = [np.array([r['pressure_kbar'] for r in results]) for results in all_results]
-        enthalpies = [np.array([r['enthalpy_Ry'] for r in results]) for results in all_results]
-        volumes = [np.array([r['volume_au3'] for r in results]) for results in all_results]
+
+        pressures = np.array([np.array([r['pressure_kbar'] for r in results]) for results in all_results])
+        enthalpies = np.array([np.array([r['enthalpy_Ry'] for r in results]) for results in all_results])
+        volumes = np.array([np.array([r['volume_au3'] for r in results]) for results in all_results])
 
         # Convert kbar to GPa for plotting if preferred (1 GPa = 10 kbar)
         pressures_gpa = pressures / 10.0
