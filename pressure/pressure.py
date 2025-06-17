@@ -9,11 +9,13 @@ parser = argparse.ArgumentParser(description="Run QE vc-relax calculations at di
 parser.add_argument('-t', '--templates', type=str, nargs='+')
 args = parser.parse_args()
 
+calculation = 'vc-relax'
+
 # --- Configuration ---
 QE_INPUT_TEMPLATES = []
 for template_name in args.templates:
-    if template_name in globals():
-        QE_INPUT_TEMPLATES.append(globals()[template_name])
+    if template_name+'_params' in globals():
+        QE_INPUT_TEMPLATES.append(globals()[template_name+'_params'])
     else:
         raise ValueError(f"Template '{template_name}' not found. Add it to templates.py.")
     
@@ -39,7 +41,9 @@ def run_qe_relaxation(pressure_kbar, index):
     output_filename = os.path.join(run_dir, f"Ge_vc-relax_{pressure_kbar}kbar.out")
 
     # Generate input file content with current pressure
-    input_content = QE_INPUT_TEMPLATES[index].format(pressure_val=pressure_kbar)
+    input_content = prepare_input(**QE_INPUT_TEMPLATES[index],
+                                  pressure=pressure_kbar,
+                                  calculation=calculation)
 
     with open(input_filename, 'w') as f:
         f.write(input_content)
@@ -50,7 +54,7 @@ def run_qe_relaxation(pressure_kbar, index):
     try:
         command = f"mpirun -np {NUM_CORES} {QE_BIN} -inp {input_filename}"
         with open(output_filename, 'w') as outfile:
-            process = subprocess.run(command.split(), stdout=outfile, stderr=subprocess.PIPE, check=True)
+            subprocess.run(command.split(), stdout=outfile, stderr=subprocess.PIPE, check=True)
         
         print(f"Calculation for P = {pressure_kbar} kbar finished.")
         

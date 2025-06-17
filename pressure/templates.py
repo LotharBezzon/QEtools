@@ -8,7 +8,7 @@ NATOMS = 2
 NTYPES = 1
 
 CELL_PARAMS = "  0.0000 2.8369 2.8369\n  2.8369 0.0000 2.8369\n  2.8369 2.8369 0.0000\n"
-ATOMIC_POSITIONS = ["1.4184 4.2553 1.4184", "0.0000 0.0000 2.8369"]
+ATOMIC_POSITIONS = "  Ge  1.4184 4.2553 1.4184\n  Ge  0.0000 0.0000 2.8369"
 DEGAUSS = 0.02
 
 # Converged parameters (replace with your actual converged values)
@@ -29,7 +29,8 @@ Ge_I_params = {
     'atomic_positions': ATOMIC_POSITIONS,
     'k_points_grid': K_POINTS_GRID,
     'degauss': 0.0,
-    'metal': False
+    'metal': False,
+    'atoms': "  Ge  72.64  Ge.pbe-kjpaw.UPF"
 }
 
 Ge_II_params = {
@@ -41,14 +42,15 @@ Ge_II_params = {
     'ecutwfc': ECUTWFC,
     'ecutrho': ECUTRHO,
     'cell_params': "  -2.5519 2.5519 1.4071\n  2.5519 -2.5519 1.4071\n  2.5519 2.5519 -1.4071\n",
-    'atomic_positions': ["2.5519 2.5519 -0.0000", "2.5519 -0.0000 0.7035"],
+    'atomic_positions': "  Ge  2.5519 2.5519 -0.0000\n  Ge  2.5519 -0.0000 0.7035",
     'k_points_grid': K_POINTS_GRID,
     'degauss': 0.02,
-    'metal': True
+    'metal': True,
+    'atoms': "  Ge  72.64  Ge.pbe-kjpaw.UPF"
 }
 
 
-def prepare_input(name, calculation, pseudo_dir, pseudo_file, outdir_base, natoms, ntypes, ecutwfc, ecutrho, cell_params, atomic_positions, k_points_grid, metal, degauss=0.0, smearing='gaussian', pressure=0.0):
+def prepare_input(name, calculation, pseudo_dir, outdir_base, natoms, ntypes, ecutwfc, ecutrho, cell_params, atoms, atomic_positions, k_points_grid, metal, degauss=0.0, smearing='gaussian', pressure=0.0):
     """
     Prepare the QE input template with the given parameters.
     """
@@ -95,10 +97,9 @@ def prepare_input(name, calculation, pseudo_dir, pseudo_file, outdir_base, natom
 CELL_PARAMETERS {{angstrom}}
 {cell_params}
 ATOMIC_SPECIES
-  Ge  72.64  {pseudo_file}
+{atoms}
 ATOMIC_POSITIONS {{angstrom}}
-  Ge  {atomic_positions[0]}
-  Ge  {atomic_positions[1]}
+{atomic_positions}
 K_POINTS {{automatic}}
   {k_points_grid}
 """

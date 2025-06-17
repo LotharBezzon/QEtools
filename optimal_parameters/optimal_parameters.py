@@ -3,47 +3,25 @@ import subprocess
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+from templates import *
+import argparse
 
-def generate_input_file(filename, ecutwfc, nkx, nky, nkz, offx, offy, offz, pseudo_dir='.', system_name='germanium'):
+parser = argparse.ArgumentParser(description="Run QE scf calculations to find optimal ecutwfc and k-points parameters.")
+parser.add_argument('-t', '--template', type=str)
+args = parser.parse_args()
+
+if args.template+'_params' in globals():
+    QE_INPUT_TEMPLATE = globals()[args.template+'_params']
+    del QE_INPUT_TEMPLATE['ecutwfc', 'ecutrho', 'k_points_grid']
+else:
+    raise ValueError(f"Template '{args.template}' not found. Add it to templates.py.")
+
+def generate_input_file(input_template, filename, ecutwfc, k_points):
     """
     Generates a Quantum ESPRESSO input file for an SCF calculation.
-
-    Args:
-        filename (str): Name of the input file to create.
-        ecutwfc (int): Kinetic energy cutoff for wavefunctions in Ry.
-        nkx, nky, nkz (int): Monkhorst-Pack grid dimensions.
-        offx, offy, offz (int): Monkhorst-Pack grid offsets (0 or 1).
-        pseudo_dir (str): Directory containing pseudopotential files.
-        system_name (str): Prefix for output files and name for pseudopotential.
     """
-    input_content = f"""
-&CONTROL
-    calculation = 'scf',
-    prefix = '{system_name}',
-    outdir = './tmp/',
-    pseudo_dir = '{pseudo_dir}',
-    tprnfor = .true. ! Print forces, useful for relaxation pre-checks
-/
-&SYSTEM
-    ibrav = 2, ! FCC lattice (for diamond structure)
-    celldm(1) = 10.26, ! Lattice parameter for Ge (a.u. / Bohr) - approximate
-    nat = 2, ! Number of atoms in the unit cell
-    ntyp = 1, ! Number of atomic types
-    ecutwfc = {ecutwfc}, ! Kinetic energy cutoff for wavefunctions (Ry)
-    ecutrho = {ecutwfc * 4}, ! Charge density cutoff (typically 4*ecutwfc for norm-conserving PP)
-/
-&ELECTRONS
-    mixing_beta = 0.7, ! Mixing factor for SCF convergence
-    conv_thr = 1.0e-8, ! Self-consistency convergence threshold
-/
-ATOMIC_SPECIES
-    Ge 72.64 Ge.pbe-kjpaw.UPF ! Example: Germanium pseudopotential (you need to have this file)
-ATOMIC_POSITIONS (alat)
-    Ge 0.00 0.00 0.00
-    Ge 0.25 0.25 0.25
-K_POINTS automatic
-    {nkx} {nky} {nkz} {offx} {offy} {offz}
-"""
+    calculation = 'scf'
+    input_content = prepare_input(**input_template, calculation=calculation, ecutwfc=ecutwfc, ecutrho=4*ecutwfc, k_points_grid=k_points)
     with open(filename, 'w') as f:
         f.write(input_content)
 
@@ -146,7 +124,7 @@ def main():
     # --- Configuration ---
     PW_X_PATH = './qe-7.4.1/bin/pw.x'  # Make sure 'pw.x' is in your system's PATH or provide full path
     PSEUDO_DIR = './qe-7.4.1/pseudo/' # Directory where your .UPF pseudopotential files are located
-    SYSTEM_NAME = 'Ge' # Prefix for output files
+    SYSTEM_NAME = args.template
 
     # Create a temporary directory for output files
     os.makedirs('./tmp', exist_ok=True)
