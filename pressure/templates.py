@@ -48,13 +48,13 @@ Ge_II_params = {
 }
 
 
-def prepare_template(name, pseudo_dir, outdir_base, natoms, ntypes, ecutwfc, ecutrho, cell_params, atomic_positions, k_points_grid, metal, degauss=0.0, smearing='gaussian'):
+def prepare_input(name, calculation, pseudo_dir, pseudo_file, outdir_base, natoms, ntypes, ecutwfc, ecutrho, cell_params, atomic_positions, k_points_grid, metal, degauss=0.0, smearing='gaussian', pressure=0.0):
     """
     Prepare the QE input template with the given parameters.
     """
     template = f"""
 &CONTROL
-  calculation = 'vc-relax'
+  calculation = '{calculation}'
   prefix = '{name}'
   outdir = '{outdir_base}'
   pseudo_dir = '{pseudo_dir}'
@@ -68,33 +68,34 @@ def prepare_template(name, pseudo_dir, outdir_base, natoms, ntypes, ecutwfc, ecu
   nat = {natoms}
   ntyp = {ntypes}
   ecutwfc = {ecutwfc}
-  ecutrho = {ecutrho}
-"""
+  ecutrho = {ecutrho}"""
     if metal:
         template += f"""
   occupation = 'smearing'
-  smearing = {smearing}
-  degauss = {degauss}
-"""
+  smearing = '{smearing}'
+  degauss = {degauss}"""
     template += f"""
 /
 &ELECTRONS
   conv_thr = 1.0d-8
   mixing_beta = 0.7
-/
+/"""
+    if calculation == 'vc-relax' or calculation == 'relax' or calculation == 'md' or calculation == 'vc-md':
+       template += f"""
 &IONS
   ion_dynamics = 'bfgs'
 /
 &CELL
   cell_dynamics = 'bfgs'
-  press = {{pressure_val}} ! Placeholder for pressure
+  press = {pressure}
   press_conv_thr = 0.5  ! kbar
   cell_dofree = 'all'
-/
+/"""
+       template += f"""
 CELL_PARAMETERS {{angstrom}}
 {cell_params}
 ATOMIC_SPECIES
-  Ge  72.64  {PSEUDOPOTENTIAL_FILE}
+  Ge  72.64  {pseudo_file}
 ATOMIC_POSITIONS {{angstrom}}
   Ge  {atomic_positions[0]}
   Ge  {atomic_positions[1]}
@@ -103,8 +104,8 @@ K_POINTS {{automatic}}
 """
     return template
 
-Ge_I = prepare_template(**Ge_I_params)
-Ge_II = prepare_template(**Ge_II_params)
+Ge_I = prepare_input(**Ge_I_params, pressure=0.0, calculation='vc-relax')
+Ge_II = prepare_input(**Ge_II_params, pressure=100.0, calculation='vc-relax')
 
 if __name__ == "__main__":
     # Print the templates to verify
