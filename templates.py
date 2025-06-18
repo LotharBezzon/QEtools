@@ -43,7 +43,7 @@ Ge_II_params = {
     'ecutrho': ECUTRHO,
     'cell_params': "  -2.5519 2.5519 1.4071\n  2.5519 -2.5519 1.4071\n  2.5519 2.5519 -1.4071\n",
     'atomic_positions': "  Ge  2.5519 2.5519 -0.0000\n  Ge  2.5519 -0.0000 0.7035",
-    'k_points_grid': K_POINTS_GRID,
+    'k_points_grid': "9 9 9 1 1 1",
     'degauss': 0.02,
     'metal': True,
     'atoms': "  Ge  72.64  Ge.pbe-kjpaw.UPF"
@@ -73,7 +73,7 @@ def prepare_input(name, calculation, pseudo_dir, outdir_base, natoms, ntypes, ec
   ecutrho = {ecutrho}"""
     if metal:
         template += f"""
-  occupation = 'smearing'
+  occupations = 'smearing'
   smearing = '{smearing}'
   degauss = {degauss}"""
     template += f"""
@@ -93,7 +93,7 @@ def prepare_input(name, calculation, pseudo_dir, outdir_base, natoms, ntypes, ec
   press_conv_thr = 0.5  ! kbar
   cell_dofree = 'all'
 /"""
-       template += f"""
+    template += f"""
 CELL_PARAMETERS {{angstrom}}
 {cell_params}
 ATOMIC_SPECIES

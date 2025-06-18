@@ -12,7 +12,8 @@ args = parser.parse_args()
 
 if args.template+'_params' in globals():
     QE_INPUT_TEMPLATE = globals()[args.template+'_params']
-    del QE_INPUT_TEMPLATE['ecutwfc', 'ecutrho', 'k_points_grid']    # These will be tested later
+    for k in ['ecutwfc', 'ecutrho', 'k_points_grid']:
+        del QE_INPUT_TEMPLATE[k]    # These will be tested later
 else:
     raise ValueError(f"Template '{args.template}' not found. Add it to templates.py.")
 
@@ -110,8 +111,7 @@ def find_converged_value(x_values, energies, tolerance=1e-4):
     if len(energies) < 2:
         return None, None
 
-    for i in range(len(energies) - 1, 0, -1):
-        # Check from the end of the list
+    for i in range(1, len(energies) - 1, 1):
         if abs(energies[i] - energies[i-1]) < tolerance:
             # Check if the next point also meets the criteria (to avoid false positives on small dips)
             if i + 1 < len(energies) and abs(energies[i+1] - energies[i]) < tolerance:
