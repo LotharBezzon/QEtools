@@ -8,7 +8,7 @@ NATOMS = 2
 NTYPES = 1
 
 CELL_PARAMS = "  0.0000 2.8369 2.8369\n  2.8369 0.0000 2.8369\n  2.8369 2.8369 0.0000\n"
-ATOMIC_POSITIONS = "  Ge  1.4184 4.2553 1.4184\n  Ge  0.0000 0.0000 2.8369"
+ATOMIC_POSITIONS = "  Ge  1.4184 1.4184 1.4184\n  Ge  2.1277 2.1277 2.1277"
 DEGAUSS = 0.02
 
 # Converged parameters (replace with your actual converged values)
@@ -33,6 +33,23 @@ Ge_I_params = {
     'atoms': "  Ge  72.64  Ge.pbe-kjpaw.UPF"
 }
 
+Ge_I_soc_params = {
+    'name': 'Ge-I',
+    'pseudo_dir': PSEUDO_DIR,
+    'outdir_base': OUTDIR_BASE,
+    'natoms': NATOMS,
+    'ntypes': NTYPES,
+    'ecutwfc': ECUTWFC,
+    'ecutrho': ECUTRHO,
+    'cell_params': CELL_PARAMS,
+    'atomic_positions': ATOMIC_POSITIONS,
+    'k_points_grid': K_POINTS_GRID,
+    'degauss': 0.0,
+    'metal': False,
+    'atoms': "  Ge  72.64  Ge.rel-pbe-dn-kjpaw_psl.UPF",
+    'mixing_beta': 0.1
+}
+
 Ge_II_params = {
     'name': 'Ge-II',
     'pseudo_dir': PSEUDO_DIR,
@@ -50,7 +67,7 @@ Ge_II_params = {
 }
 
 
-def prepare_input(name, calculation, pseudo_dir, outdir_base, natoms, ntypes, ecutwfc, ecutrho, cell_params, atoms, atomic_positions, k_points_grid, metal, degauss=0.0, smearing='gaussian', pressure=0.0):
+def prepare_input(name, calculation, pseudo_dir, outdir_base, natoms, ntypes, ecutwfc, ecutrho, cell_params, atoms, atomic_positions, k_points_grid, metal, degauss=0.0, smearing='gaussian', pressure=0.0, mixing_beta=0.7):
     """
     Prepare the QE input template with the given parameters.
     """
@@ -76,11 +93,15 @@ def prepare_input(name, calculation, pseudo_dir, outdir_base, natoms, ntypes, ec
   occupations = 'smearing'
   smearing = '{smearing}'
   degauss = {degauss}"""
+    if 'rel' in atoms:
+        template += f"""
+  noncolin = .TRUE.
+  lspinorb = .TRUE."""
     template += f"""
 /
 &ELECTRONS
   conv_thr = 1.0d-8
-  mixing_beta = 0.7
+  mixing_beta = {mixing_beta}
 /"""
     if calculation == 'vc-relax' or calculation == 'relax' or calculation == 'md' or calculation == 'vc-md':
        template += f"""
