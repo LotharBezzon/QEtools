@@ -3,8 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 
+k_points_path = [r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$', 'L', 'U', 'W', 'L', 'K|U', '', 'X']
+
 parser = argparse.ArgumentParser(description="Plot band structure from Quantum ESPRESSO bands.dat file.")
 parser.add_argument('-i', '--input_prefix', type=str)
+parser.add_argument('-p', '--path', action='store_true', required=False,)
+parser.add_argument('-n', '--nbnds', type=int, default=12, help='Number of bands to plot (default: 12)')
 args = parser.parse_args()
 
 bands_file = f"bands_data/{args.input_prefix}.bands.dat"
@@ -42,6 +46,7 @@ while i < len(lines):
 
 kpoints = np.array(kpoints)        # shape: (nks, 3)
 bands = np.array(bands)            # shape: (nks, nbnd)
+bands = bands[:, -args.nbnds:]
 
 ### Find special k-points
 special_kpoints = [(kpoints[0], 0)]
@@ -66,6 +71,13 @@ x = np.concatenate((x, np.array([x[-1] + np.diff(x)[-1]])))     # shape (nks,)
 fig = plt.figure(figsize=(8, 5))
 plt.plot(x, bands, color='k', linewidth=0.5)
 for i in range(len(special_kpoints)):
-    plt.axvline(x[special_kpoints[i][1]], color='r', linestyle='--')
+    plt.axvline(x[special_kpoints[i][1]], color='r', linewidth=0.5, alpha=0.5)
 
+plt.xticks([])
+if args.path:
+    plt.xticks([x[special_kpoints[i][1]] for i in range(len(special_kpoints))],
+               [k_points_path[i] for i in range(len(special_kpoints))])
+    
+plt.savefig(f"bands_data/{args.input_prefix}.bands.png", dpi=300, bbox_inches='tight')
+plt.ylabel('Energy (eV)')
 plt.show()

@@ -24,7 +24,7 @@ Run from the command line with arguments:
   ``` 
   
 - **plot_bands.py**:
-  Take as input a `.dat` file from a QE bands calculation. Plot the bands and vertical axes corresponding to the special k points. Run with
+  Take as input a `.dat` file from a QE bands calculation. Plot the bands and vertical axes corresponding to the special k points. If you want to print the high-symmetry k points on the x axis use the `-p` option. Run with
   ```bash
-  python3 plot_bands.py -i [prefix material]
+  python3 plot_bands.py -i [prefix material] (-p)
   ``` 
