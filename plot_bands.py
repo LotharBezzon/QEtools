@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 
-k_points_path = [r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$', 'L', 'U', 'W', 'L', 'K|U', '', 'X']
+#k_points_path = [r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$', 'L', 'U', 'W', 'L', 'K|U', '', 'X']
+k_points_path = [r'$\Gamma$', 'X', 'M', r'$\Gamma$', 'Z', 'P', 'N', r'$Z_1$', 'M|X', '', 'P']
 
 parser = argparse.ArgumentParser(description="Plot band structure from Quantum ESPRESSO bands.dat file.")
 parser.add_argument('-i', '--input_prefix', type=str)
@@ -53,7 +54,7 @@ special_kpoints = [(kpoints[0], 0)]
 
 diff_kpoints = np.diff(kpoints, axis=0)
 for i in range(1, len(diff_kpoints)):
-    if np.linalg.norm(diff_kpoints[i-1] - diff_kpoints[i]) > 1e-8:
+    if np.linalg.norm(diff_kpoints[i-1] - diff_kpoints[i]) > 1e-4:
         special_kpoints.append((kpoints[i], i))
 
 special_kpoints.append((kpoints[-1], len(kpoints) - 1))
@@ -78,6 +79,8 @@ if args.path:
     plt.xticks([x[special_kpoints[i][1]] for i in range(len(special_kpoints))],
                [k_points_path[i] for i in range(len(special_kpoints))])
     
-plt.savefig(f"bands_data/{args.input_prefix}.bands.png", dpi=300, bbox_inches='tight')
 plt.ylabel('Energy (eV)')
+    
+plt.savefig(f"bands_data/{args.input_prefix}.bands.png", dpi=300, bbox_inches='tight')
+
 plt.show()
